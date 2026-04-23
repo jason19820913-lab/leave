@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>員工請假後台 - 統計管理</title>
+<style>
+  :root{
+    --bg:#f3f5f9; --card:#ffffff; --border:#e2e8f0; --muted:#64748b;
+    --primary:#2563eb; --primary-h:#1d4ed8; --ok:#16a34a; --err:#dc2626;
+    --text:#0f172a; --soft:#f8fafc; --accent:#0ea5e9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:16px;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif;color:var(--text)}
+  .wrap{max-width:1200px;margin:0 auto}
+  .title{font-size:22px;font-weight:800;margin:4px 0 14px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.03);margin-bottom:14px}
+
+  /* 登入 */
+  .login-wrap{max-width:400px;margin:80px auto 0}
+  .login-title{text-align:center;font-size:22px;font-weight:800;margin-bottom:14px}
+  .input,.select{width:100%;padding:10px 12px;font-size:15px;border:1px solid var(--border);border-radius:9px;background:#fff;outline:none;font-family:inherit}
+  .input:focus,.select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+  .btn{padding:10px 18px;font-size:14px;font-weight:700;border:none;border-radius:9px;cursor:pointer;background:var(--primary);color:#fff;transition:background .15s}
+  .btn:hover{background:var(--primary-h)}
+  .btn.sec{background:#fff;color:var(--text);border:1px solid var(--border)}
+  .btn.sec:hover{background:var(--soft)}
+  .btn.danger{background:var(--err)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn-wide{width:100%}
+
+  /* 篩選 */
+  .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .field label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+  /* 統計卡 */
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+  .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+  .kpi-label{font-size:12px;color:var(--muted);font-weight:600}
+  .kpi-value{font-size:26px;font-weight:800;margin-top:2px;color:var(--primary)}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:860px){ .grid2{grid-template-columns:1fr} }
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media (max-width:860px){ .grid3{grid-template-columns:1fr} }
+
+  h3.section{margin:0 0 10px;font-size:15px;font-weight:800}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .bar-label{width:110px;font-size:13px;color:#334155;flex-shrink:0}
+  .bar-track{flex:1;background:#eef2f7;border-radius:6px;height:18px;position:relative;overflow:hidden}
+  .bar-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:6px;transition:width .4s}
+  .bar-count{width:40px;text-align:right;font-size:13px;font-weight:700;flex-shrink:0}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+  th{background:var(--soft);color:var(--muted);font-size:12px;font-weight:700}
+  tbody tr:hover{background:#f8fafc}
+  .empty{text-align:center;padding:40px;color:var(--muted)}
+  .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:#dbeafe;color:#1e40af}
+  .tag.病假{background:#fee2e2;color:#991b1b}
+  .tag.事假{background:#fef3c7;color:#92400e}
+  .tag.特休{background:#dcfce7;color:#166534}
+  .tag.生理假{background:#fce7f3;color:#9f1239}
+  .tag.婚假{background:#fae8ff;color:#86198f}
+  .tag.喪假{background:#e5e7eb;color:#374151}
+  .tag.補休{background:#ccfbf1;color:#115e59}
+  .tag.調班{background:#e0e7ff;color:#3730a3}
+  .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .small{font-size:12px;color:var(--muted)}
+  .toast{position:fixed;left:50%;top:24px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none}
+  .toast.show{opacity:1}
+  .toast.ok{background:var(--ok)}
+  .toast.err{background:var(--err)}
+  .table-wrap{overflow-x:auto}
+  .logout{float:right;cursor:pointer;color:var(--muted);font-size:13px}
+  .logout:hover{color:var(--err)}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<!-- 登入畫面 -->
+<div id="loginView" class="login-wrap">
+  <div class="card">
+    <div class="login-title">🔒 請假後台管理</div>
+    <div class="field" style="margin-bottom:10px">
+      <label>管理員密碼</label>
+      <input id="pwInput" class="input" type="password" placeholder="請輸入管理員密碼" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-wide" onclick="doLogin()">登入</button>
+  </div>
+</div>
+
+<!-- 主畫面 -->
+<div id="mainView" class="wrap" style="display:none">
+  <div class="title">員工請假統計後台 <span class="logout" onclick="logout()">登出</span></div>
+
+  <!-- 篩選 -->
+  <div class="card">
+    <div class="filters">
+      <div class="field">
+        <label>開始日期</label>
+        <input id="fStart" class="input" type="date">
+      </div>
+      <div class="field">
+        <label>結束日期</label>
+        <input id="fEnd" class="input" type="date">
+      </div>
+      <div class="field">
+        <label>院區</label>
+        <select id="fClinic" class="select"><option value="">全部</option></select>
+      </div>
+      <div class="field">
+        <label>職類</label>
+        <select id="fJob" class="select"><option value="">全部</option></select>
+      </div>
+      <div class="field">
+        <label>請假類別</label>
+        <select id="fType" class="select"><option value="">全部</option></select>
+      </div>
+      <div class="field">
+        <label>員工姓名</label>
+        <input id="fName" class="input" type="text" placeholder="模糊搜尋">
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn" onclick="loadStats()">查詢</button>
+      <button class="btn sec" onclick="resetFilters()">重設</button>
+      <button class="btn sec" onclick="quickRange('thisMonth')">本月</button>
+      <button class="btn sec" onclick="quickRange('lastMonth')">上月</button>
+      <button class="btn sec" onclick="quickRange('thisYear')">今年</button>
+      <button class="btn sec" onclick="exportCSV()">📥 匯出 CSV</button>
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="card empty">請點「查詢」開始統計</div>
+  </div>
+</div>
+
+<script>
+/* ====== 請改成你部署完成後拿到的 Web App 網址 ====== */
+var API = 'https://script.google.com/macros/s/AKfycbw_ea4nfFua_ibginB9H_94jyHtCeebNaBTV_2OoWjpo7XUyW7XrFs-9Hbtgg3U3SBF/exec';
+
+var PASSWORD = '';
+var CURRENT_DATA = null;
+
+function qs(id){ return document.getElementById(id); }
+function toast(msg, type){
+  var el = qs('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.className = 'toast'; }, 2500);
+}
+function get(params, cb){
+  var q = Object.keys(params).map(function(k){
+    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k] == null ? '' : params[k]);
+  }).join('&');
+  fetch(API + '?' + q).then(function(r){ return r.json(); }).then(cb).catch(function(err){
+    toast('連線失敗：' + err, 'err');
+  });
+}
+function esc(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+/* ---------- 登入 ---------- */
+function doLogin(){
+  var pw = qs('pwInput').value;
+  if (!pw) { toast('請輸入密碼', 'err'); return; }
+  get({ action: 'verifyAdmin', password: pw }, function(res){
+    if (res && res.success) {
+      PASSWORD = pw;
+      try { sessionStorage.setItem('leave_admin_pw', pw); } catch(e){}
+      qs('loginView').style.display = 'none';
+      qs('mainView').style.display = '';
+      loadLists();
+    } else {
+      toast((res && res.error) || '密碼錯誤', 'err');
+    }
+  });
+}
+function logout(){
+  PASSWORD = '';
+  try { sessionStorage.removeItem('leave_admin_pw'); } catch(e){}
+  qs('mainView').style.display = 'none';
+  qs('loginView').style.display = '';
+  qs('pwInput').value = '';
+}
+
+/* ---------- 載入清單 ---------- */
+function loadLists(){
+  get({ action: 'getLists' }, function(res){
+    if (res && res.error) { toast('讀取清單失敗：' + res.error, 'err'); return; }
+    fillSelect('fClinic', res.clinics || [], '全部');
+    fillSelect('fJob', res.jobs || [], '全部');
+    fillSelect('fType', res.leaveTypes || [], '全部');
+    // 預設本月
+    quickRange('thisMonth');
+    loadStats();
+  });
+}
+function fillSelect(id, arr, allLabel){
+  var el = qs(id);
+  el.innerHTML = '<option value="">'+ (allLabel || '全部') +'</option>';
+  arr.forEach(function(v){
+    var opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    el.appendChild(opt);
+  });
+}
+
+/* ---------- 日期工具 ---------- */
+function ymd(d){
+  var y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+dd;
+}
+function quickRange(kind){
+  var now = new Date();
+  var s, e;
+  if (kind === 'thisMonth') {
+    s = new Date(now.getFullYear(), now.getMonth(), 1);
+    e = new Date(now.getFullYear(), now.getMonth()+1, 0);
+  } else if (kind === 'lastMonth') {
+    s = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    e = new Date(now.getFullYear(), now.getMonth(), 0);
+  } else if (kind === 'thisYear') {
+    s = new Date(now.getFullYear(), 0, 1);
+    e = new Date(now.getFullYear(), 11, 31);
+  }
+  qs('fStart').value = ymd(s);
+  qs('fEnd').value = ymd(e);
+}
+function resetFilters(){
+  qs('fStart').value = '';
+  qs('fEnd').value = '';
+  qs('fClinic').value = '';
+  qs('fJob').value = '';
+  qs('fType').value = '';
+  qs('fName').value = '';
+}
+
+/* ---------- 讀取統計 ---------- */
+function loadStats(){
+  qs('content').innerHTML = '<div class="card empty">查詢中...</div>';
+  var params = {
+    action: 'getStats',
+    startDate: qs('fStart').value,
+    endDate: qs('fEnd').value,
+    clinic: qs('fClinic').value,
+    job: qs('fJob').value,
+    leaveType: qs('fType').value,
+    name: qs('fName').value.trim()
+  };
+  get(params, function(res){
+    if (res && res.error) { toast('查詢失敗：' + res.error, 'err'); return; }
+    CURRENT_DATA = res;
+    render(res);
+  });
+}
+
+/* ---------- 繪製 ---------- */
+function render(data){
+  var records = data.records || [];
+  var html = '';
+
+  // KPI
+  var uniqEmp = {};
+  records.forEach(function(r){ uniqEmp[r.empNo] = 1; });
+  html += '<div class="kpi">';
+  html += kpi('請假筆數', records.length);
+  html += kpi('涉及員工數', Object.keys(uniqEmp).length);
+  html += kpi('涉及院區數', Object.keys(data.byClinic||{}).length);
+  html += kpi('涉及類別數', Object.keys(data.byType||{}).length);
+  html += '</div>';
+
+  // 三個橫條統計
+  html += '<div class="grid3">';
+  html += barCard('各院區請假次數', data.byClinic);
+  html += barCard('請假類別分佈', data.byType);
+  html += barCard('職類分佈', data.byJob);
+  html += '</div>';
+
+  // 員工排行 + 時段分佈
+  html += '<div class="grid2">';
+  html += barCard('員工請假次數排行（前10）', topN(data.byEmployee || {}, 10));
+  html += barCard('時段分佈', data.byShift);
+  html += '</div>';
+
+  // 明細
+  html += '<div class="card">';
+  html += '<div class="head"><h3 class="section">明細記錄（共 '+ records.length +' 筆）</h3></div>';
+  if (records.length === 0) {
+    html += '<div class="empty">沒有符合條件的記錄</div>';
+  } else {
+    html += '<div class="table-wrap"><table><thead><tr>';
+    html += '<th>員編</th><th>姓名</th><th>院區</th><th>職類</th><th>請假日期</th><th>時段</th><th>類別</th><th>代班人員</th><th>送出時間</th><th>操作</th>';
+    html += '</tr></thead><tbody>';
+    records.forEach(function(r){
+      var typeTag = '<span class="tag '+ esc(r.leaveType) +'">'+ esc(r.leaveType) +'</span>';
+      html += '<tr>';
+      html += '<td>'+ esc(r.empNo) +'</td>';
+      html += '<td>'+ esc(r.name) +'</td>';
+      html += '<td>'+ esc(r.clinic) +'</td>';
+      html += '<td>'+ esc(r.job) +'</td>';
+      html += '<td>'+ esc(r.leaveDate) +'</td>';
+      html += '<td>'+ esc(r.shift) +'</td>';
+      html += '<td>'+ typeTag +'</td>';
+      html += '<td>'+ esc(r.substitute) +'</td>';
+      html += '<td class="small">'+ esc(r.createdAt) +'</td>';
+      html += '<td><button class="btn sec" style="padding:4px 10px;font-size:12px" onclick="delRec(\''+ esc(r.recId) +'\')">刪除</button></td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+  html += '</div>';
+
+  qs('content').innerHTML = html;
+}
+
+function kpi(label, value){
+  return '<div class="kpi-card"><div class="kpi-label">'+ label +'</div><div class="kpi-value">'+ value +'</div></div>';
+}
+function barCard(title, obj){
+  obj = obj || {};
+  var entries = Object.keys(obj).map(function(k){ return [k, obj[k]]; });
+  entries.sort(function(a,b){ return b[1] - a[1]; });
+  var max = entries.reduce(function(m,e){ return e[1] > m ? e[1] : m; }, 1);
+  var body = '';
+  if (entries.length === 0) {
+    body = '<div class="empty" style="padding:20px">無資料</div>';
+  } else {
+    entries.forEach(function(e){
+      var pct = Math.round(e[1] / max * 100);
+      body += '<div class="bar-row">';
+      body += '<div class="bar-label" title="'+ esc(e[0]) +'">'+ esc(e[0]) +'</div>';
+      body += '<div class="bar-track"><div class="bar-fill" style="width:'+ pct +'%"></div></div>';
+      body += '<div class="bar-count">'+ e[1] +'</div>';
+      body += '</div>';
+    });
+  }
+  return '<div class="card"><h3 class="section">'+ title +'</h3>'+ body +'</div>';
+}
+function topN(obj, n){
+  var arr = Object.keys(obj).map(function(k){ return [k, obj[k]]; });
+  arr.sort(function(a,b){ return b[1] - a[1]; });
+  arr = arr.slice(0, n);
+  var result = {};
+  arr.forEach(function(e){ result[e[0]] = e[1]; });
+  return result;
+}
+
+/* ---------- 刪除 ---------- */
+function delRec(recId){
+  if (!confirm('確定刪除此筆記錄？（無法還原）')) return;
+  get({ action: 'deleteLeave', recId: recId, password: PASSWORD }, function(res){
+    if (res && res.success) {
+      toast('已刪除', 'ok');
+      loadStats();
+    } else {
+      toast('刪除失敗：' + ((res && res.error) || ''), 'err');
+    }
+  });
+}
+
+/* ---------- 匯出 CSV ---------- */
+function exportCSV(){
+  if (!CURRENT_DATA || !CURRENT_DATA.records || !CURRENT_DATA.records.length) {
+    toast('沒有資料可匯出', 'err'); return;
+  }
+  var headers = ['員編','姓名','院區','職類','請假日期','時段','類別','代班人員','送出時間','記錄編號'];
+  var rows = CURRENT_DATA.records.map(function(r){
+    return [r.empNo, r.name, r.clinic, r.job, r.leaveDate, r.shift, r.leaveType, r.substitute, r.createdAt, r.recId];
+  });
+  var csv = [headers].concat(rows).map(function(row){
+    return row.map(function(c){
+      var s = String(c == null ? '' : c);
+      if (/[",\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    }).join(',');
+  }).join('\n');
+  // 加 BOM 避免 Excel 亂碼
+  var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var now = new Date();
+  a.href = url;
+  a.download = '請假記錄_' + ymd(now) + '.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast('已匯出 CSV', 'ok');
+}
+
+/* ---------- 初始化：自動登入 ---------- */
+(function init(){
+  try {
+    var saved = sessionStorage.getItem('leave_admin_pw');
+    if (saved) { qs('pwInput').value = saved; doLogin(); }
+  } catch(e){}
+})();
+</script>
+</body>
+</html>

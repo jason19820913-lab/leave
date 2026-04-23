@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>員工請假申請</title>
+<style>
+  :root{
+    --bg:#f3f5f9; --card:#ffffff; --border:#e2e8f0; --muted:#64748b;
+    --primary:#2563eb; --primary-h:#1d4ed8; --ok:#16a34a; --err:#dc2626;
+    --text:#0f172a; --soft:#f8fafc;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:16px;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif;color:var(--text);-webkit-tap-highlight-color:transparent}
+  .wrap{max-width:520px;margin:0 auto}
+  .title{text-align:center;font-size:22px;font-weight:700;margin:6px 0 14px}
+  .subtitle{text-align:center;color:var(--muted);font-size:13px;margin-bottom:18px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .field{margin-bottom:14px}
+  .label{display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px}
+  .req{color:var(--err);margin-left:3px}
+  .input, .select, .textarea{width:100%;padding:11px 12px;font-size:16px;border:1px solid var(--border);border-radius:9px;background:#fff;outline:none;color:var(--text);font-family:inherit}
+  .input:focus, .select:focus, .textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+  .textarea{min-height:70px;resize:vertical}
+  .row{display:flex;gap:10px}
+  .row > *{flex:1}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:8px 14px;font-size:14px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer;user-select:none;transition:all .15s}
+  .chip:hover{background:var(--soft)}
+  .chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .btn{width:100%;padding:14px;font-size:16px;font-weight:700;border:none;border-radius:11px;cursor:pointer;background:var(--primary);color:#fff;margin-top:6px;transition:background .15s}
+  .btn:hover{background:var(--primary-h)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .toast{position:fixed;left:50%;top:24px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90%;text-align:center}
+  .toast.show{opacity:1}
+  .toast.ok{background:var(--ok)}
+  .toast.err{background:var(--err)}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  .success{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:16px;border-radius:12px;text-align:center;margin-top:14px}
+  .success .big{font-size:17px;font-weight:700;margin-bottom:4px}
+  .footer{text-align:center;color:var(--muted);font-size:12px;margin:18px 0 4px}
+  .link{color:var(--primary);text-decoration:none}
+  .loading{display:flex;justify-content:center;padding:24px;color:var(--muted)}
+  .date-mode{display:flex;gap:8px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<div class="wrap">
+  <div class="title">員工請假申請</div>
+  <div class="subtitle">請確實填寫下列資訊，送出後將自動記錄</div>
+
+  <div class="card" id="formCard">
+    <div id="loadingBox" class="loading">載入中...</div>
+
+    <div id="form" style="display:none">
+      <div class="field">
+        <label class="label">員工編號<span class="req">*</span></label>
+        <input id="empNo" class="input" type="text" placeholder="例如：E001" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label class="label">姓名<span class="req">*</span></label>
+        <input id="name" class="input" type="text" placeholder="請輸入您的姓名" autocomplete="off">
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label class="label">院區<span class="req">*</span></label>
+          <select id="clinic" class="select"><option value="">請選擇</option></select>
+        </div>
+        <div class="field">
+          <label class="label">職類<span class="req">*</span></label>
+          <select id="job" class="select"><option value="">請選擇</option></select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">請假類別<span class="req">*</span></label>
+        <select id="leaveType" class="select"><option value="">請選擇</option></select>
+      </div>
+
+      <div class="field">
+        <label class="label">請假日期<span class="req">*</span></label>
+        <div class="date-mode">
+          <div class="chip active" data-mode="single" onclick="setDateMode('single')">單日</div>
+          <div class="chip" data-mode="range" onclick="setDateMode('range')">區間</div>
+        </div>
+        <div id="singleDateBox">
+          <input id="dateSingle" class="input" type="date">
+        </div>
+        <div id="rangeDateBox" style="display:none">
+          <div class="row">
+            <input id="dateStart" class="input" type="date">
+            <input id="dateEnd" class="input" type="date">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">請假時段<span class="req">*</span></label>
+        <div id="shiftChips" class="chips"></div>
+      </div>
+
+      <div class="field">
+        <label class="label">代班人員</label>
+        <input id="substitute" class="input" type="text" placeholder="請填寫代班同事的姓名" autocomplete="off">
+        <div class="hint">若已確認有人代班，請在此填寫；未確認可留空</div>
+      </div>
+
+      <button id="submitBtn" class="btn" onclick="submit()">送出請假申請</button>
+    </div>
+
+    <div id="successBox" class="success" style="display:none">
+      <div class="big">✓ 請假申請已送出</div>
+      <div>記錄編號：<span id="recIdDisplay"></span></div>
+      <div style="margin-top:10px"><button class="chip" onclick="resetForm()">再填寫一筆</button></div>
+    </div>
+  </div>
+
+  <div class="footer">© 員工請假管理系統</div>
+</div>
+
+<script>
+/* ====== 請改成你部署完成後拿到的 Web App 網址 ====== */
+var API = 'https://script.google.com/macros/s/AKfycbw_ea4nfFua_ibginB9H_94jyHtCeebNaBTV_2OoWjpo7XUyW7XrFs-9Hbtgg3U3SBF/exec';
+
+var LISTS = null;
+var DATE_MODE = 'single';
+var SHIFT = '';
+
+/* ---------- 小工具 ---------- */
+function qs(id){ return document.getElementById(id); }
+function toast(msg, type){
+  var el = qs('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.className = 'toast'; }, 2500);
+}
+function get(params, cb){
+  var q = Object.keys(params).map(function(k){
+    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k] == null ? '' : params[k]);
+  }).join('&');
+  fetch(API + '?' + q).then(function(r){ return r.json(); }).then(cb).catch(function(err){
+    toast('連線失敗：' + err, 'err');
+  });
+}
+function fillSelect(id, arr){
+  var el = qs(id);
+  el.innerHTML = '<option value="">請選擇</option>';
+  arr.forEach(function(v){
+    var opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    el.appendChild(opt);
+  });
+}
+function renderShiftChips(arr){
+  var box = qs('shiftChips');
+  box.innerHTML = '';
+  arr.forEach(function(s){
+    var c = document.createElement('div');
+    c.className = 'chip';
+    c.textContent = s;
+    c.onclick = function(){
+      SHIFT = s;
+      Array.prototype.forEach.call(box.children, function(x){ x.classList.remove('active'); });
+      c.classList.add('active');
+    };
+    box.appendChild(c);
+  });
+}
+
+/* ---------- 日期模式切換 ---------- */
+function setDateMode(m){
+  DATE_MODE = m;
+  document.querySelectorAll('.date-mode .chip').forEach(function(c){
+    c.classList.toggle('active', c.dataset.mode === m);
+  });
+  qs('singleDateBox').style.display = (m === 'single') ? '' : 'none';
+  qs('rangeDateBox').style.display  = (m === 'range')  ? '' : 'none';
+}
+
+/* ---------- 載入清單 ---------- */
+function loadLists(){
+  get({ action: 'getLists' }, function(res){
+    if (res && res.error) { toast('讀取清單失敗：' + res.error, 'err'); return; }
+    LISTS = res;
+    fillSelect('clinic', res.clinics || []);
+    fillSelect('job', res.jobs || []);
+    fillSelect('leaveType', res.leaveTypes || []);
+    renderShiftChips(res.shifts || []);
+    qs('loadingBox').style.display = 'none';
+    qs('form').style.display = '';
+    // 預設今天
+    var today = new Date();
+    var y = today.getFullYear(), m = String(today.getMonth()+1).padStart(2,'0'), d = String(today.getDate()).padStart(2,'0');
+    var s = y + '-' + m + '-' + d;
+    qs('dateSingle').value = s;
+    qs('dateStart').value = s;
+    qs('dateEnd').value = s;
+  });
+}
+
+/* ---------- 送出 ---------- */
+function submit(){
+  var empNo = qs('empNo').value.trim();
+  var name = qs('name').value.trim();
+  var clinic = qs('clinic').value;
+  var job = qs('job').value;
+  var leaveType = qs('leaveType').value;
+  var sub = qs('substitute').value.trim();
+
+  var leaveDate = '';
+  if (DATE_MODE === 'single') {
+    leaveDate = qs('dateSingle').value;
+  } else {
+    var s = qs('dateStart').value, e = qs('dateEnd').value;
+    if (!s || !e) { toast('請選擇完整的日期區間', 'err'); return; }
+    if (s > e) { toast('開始日期不可晚於結束日期', 'err'); return; }
+    leaveDate = (s === e) ? s : (s + ' ~ ' + e);
+  }
+
+  if (!empNo)     { toast('請輸入員工編號', 'err'); return; }
+  if (!name)      { toast('請輸入姓名', 'err'); return; }
+  if (!clinic)    { toast('請選擇院區', 'err'); return; }
+  if (!job)       { toast('請選擇職類', 'err'); return; }
+  if (!leaveType) { toast('請選擇請假類別', 'err'); return; }
+  if (!leaveDate) { toast('請選擇請假日期', 'err'); return; }
+  if (!SHIFT)     { toast('請選擇請假時段', 'err'); return; }
+
+  qs('submitBtn').disabled = true;
+  qs('submitBtn').textContent = '送出中...';
+
+  get({
+    action: 'submitLeave',
+    empNo: empNo, name: name, clinic: clinic, job: job,
+    leaveType: leaveType, leaveDate: leaveDate, shift: SHIFT,
+    substitute: sub
+  }, function(res){
+    qs('submitBtn').disabled = false;
+    qs('submitBtn').textContent = '送出請假申請';
+    if (res && res.success) {
+      qs('form').style.display = 'none';
+      qs('successBox').style.display = '';
+      qs('recIdDisplay').textContent = res.recId || '';
+      toast('送出成功', 'ok');
+    } else {
+      toast('送出失敗：' + ((res && res.error) || '未知錯誤'), 'err');
+    }
+  });
+}
+
+function resetForm(){
+  qs('empNo').value = '';
+  qs('name').value = '';
+  qs('clinic').value = '';
+  qs('job').value = '';
+  qs('leaveType').value = '';
+  qs('substitute').value = '';
+  SHIFT = '';
+  Array.prototype.forEach.call(qs('shiftChips').children, function(x){ x.classList.remove('active'); });
+  qs('successBox').style.display = 'none';
+  qs('form').style.display = '';
+}
+
+loadLists();
+</script>
+</body>
+</html>
