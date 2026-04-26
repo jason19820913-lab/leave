@@ -8,15 +8,13 @@
   :root{
     --bg:#f3f5f9; --card:#ffffff; --border:#e2e8f0; --muted:#64748b;
     --primary:#2563eb; --primary-h:#1d4ed8; --ok:#16a34a; --err:#dc2626;
-    --text:#0f172a; --soft:#f8fafc; --accent:#0ea5e9;
+    --text:#0f172a; --soft:#f8fafc; --accent:#0ea5e9; --warn:#f59e0b;
   }
   *{box-sizing:border-box}
   body{margin:0;padding:16px;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif;color:var(--text)}
   .wrap{max-width:1200px;margin:0 auto}
-  .title{font-size:22px;font-weight:800;margin:4px 0 14px}
+  .title{font-size:22px;font-weight:800;margin:4px 0 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
   .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.03);margin-bottom:14px}
-
-  /* 登入 */
   .login-wrap{max-width:400px;margin:80px auto 0}
   .login-title{text-align:center;font-size:22px;font-weight:800;margin-bottom:14px}
   .input,.select{width:100%;padding:10px 12px;font-size:15px;border:1px solid var(--border);border-radius:9px;background:#fff;outline:none;font-family:inherit}
@@ -28,30 +26,24 @@
   .btn.danger{background:var(--err)}
   .btn:disabled{opacity:.55;cursor:not-allowed}
   .btn-wide{width:100%}
-
-  /* 篩選 */
   .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .field{margin-bottom:10px}
   .field label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px}
   .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-
-  /* 統計卡 */
   .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
   .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
   .kpi-label{font-size:12px;color:var(--muted);font-weight:600}
   .kpi-value{font-size:26px;font-weight:800;margin-top:2px;color:var(--primary)}
-
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media (max-width:860px){ .grid2{grid-template-columns:1fr} }
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
   @media (max-width:860px){ .grid3{grid-template-columns:1fr} }
-
   h3.section{margin:0 0 10px;font-size:15px;font-weight:800}
   .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
   .bar-label{width:110px;font-size:13px;color:#334155;flex-shrink:0}
   .bar-track{flex:1;background:#eef2f7;border-radius:6px;height:18px;position:relative;overflow:hidden}
   .bar-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:6px;transition:width .4s}
   .bar-count{width:40px;text-align:right;font-size:13px;font-weight:700;flex-shrink:0}
-
   table{width:100%;border-collapse:collapse;font-size:13px}
   th,td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
   th{background:var(--soft);color:var(--muted);font-size:12px;font-weight:700}
@@ -68,22 +60,33 @@
   .tag.調班{background:#e0e7ff;color:#3730a3}
   .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
   .small{font-size:12px;color:var(--muted)}
-  .toast{position:fixed;left:50%;top:24px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none}
+  .toast{position:fixed;left:50%;top:24px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90%;text-align:center}
   .toast.show{opacity:1}
   .toast.ok{background:var(--ok)}
   .toast.err{background:var(--err)}
   .table-wrap{overflow-x:auto}
-  .header-tools{float:right;display:flex;gap:14px;align-items:center}
-  .header-link{cursor:pointer;color:var(--muted);font-size:13px}
+  .header-tools{display:flex;gap:14px;align-items:center;font-size:13px}
+  .who{color:var(--muted)}
+  .who b{color:var(--text)}
+  .header-link{cursor:pointer;color:var(--muted)}
   .header-link:hover{color:var(--primary)}
   .header-link.logout:hover{color:var(--err)}
   /* Modal */
   .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
-  .modal{background:#fff;border-radius:14px;padding:22px;max-width:380px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-  .modal-title{font-size:17px;font-weight:800;margin-bottom:14px}
-  .modal .field{margin-bottom:12px}
-  .modal label{display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:5px}
+  .modal{background:#fff;border-radius:14px;padding:22px;max-width:480px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+  .modal-title{font-size:17px;font-weight:800;margin-bottom:10px}
   .modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+  /* Role chips */
+  .role-list{display:flex;flex-wrap:wrap;gap:8px;min-height:42px;padding:8px;border:1px dashed var(--border);border-radius:9px;margin-bottom:10px;background:var(--soft)}
+  .role-list:empty::before{content:'尚未設定（目前為初始狀態：任何在職員工皆可登入）';color:var(--warn);font-size:12px;line-height:24px}
+  .role-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 12px;background:var(--primary);color:#fff;border-radius:999px;font-size:13px}
+  .role-chip .x{cursor:pointer;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.25);display:inline-flex;align-items:center;justify-content:center;font-size:11px;line-height:1}
+  .role-chip .x:hover{background:rgba(255,255,255,.45)}
+  .add-role-row{display:flex;gap:8px;margin-bottom:6px}
+  .add-role-row select,.add-role-row input{flex:1}
+  .alert{padding:10px 12px;border-radius:9px;font-size:13px;margin-bottom:10px}
+  .alert.warn{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+  .alert.info{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd}
 </style>
 </head>
 <body>
@@ -93,50 +96,43 @@
 <div id="loginView" class="login-wrap">
   <div class="card">
     <div class="login-title">🔒 請假後台管理</div>
+    <div class="field">
+      <label>員工編號</label>
+      <input id="loginEmpNo" class="input" type="text" placeholder="您的員編" autocomplete="username">
+    </div>
     <div class="field" style="margin-bottom:10px">
-      <label>管理員密碼</label>
-      <input id="pwInput" class="input" type="password" placeholder="請輸入管理員密碼" onkeydown="if(event.key==='Enter')doLogin()">
+      <label>密碼</label>
+      <input id="loginPw" class="input" type="password" placeholder="員工系統密碼" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <button class="btn btn-wide" onclick="doLogin()">登入</button>
+    <div class="small" style="margin-top:10px;text-align:center">員編與密碼依公司員工資料表為準</div>
   </div>
 </div>
 
 <!-- 主畫面 -->
 <div id="mainView" class="wrap" style="display:none">
-  <div class="title">員工請假統計後台
+  <div class="title">
+    <span>員工請假統計後台</span>
     <span class="header-tools">
-      <span class="header-link" onclick="openChangePw()">🔑 更改密碼</span>
+      <span class="who">登入：<b id="whoName">-</b> <span id="whoTitle"></span></span>
+      <span class="header-link" onclick="openPermsModal()">⚙️ 權限管理</span>
       <span class="header-link logout" onclick="logout()">登出</span>
     </span>
+  </div>
+
+  <div id="initBanner" style="display:none" class="alert warn">
+    ⚠️ 目前尚未設定任何允許職稱，所有員工都能登入後台。請點右上角「⚙️ 權限管理」立即設定。
   </div>
 
   <!-- 篩選 -->
   <div class="card">
     <div class="filters">
-      <div class="field">
-        <label>開始日期</label>
-        <input id="fStart" class="input" type="date">
-      </div>
-      <div class="field">
-        <label>結束日期</label>
-        <input id="fEnd" class="input" type="date">
-      </div>
-      <div class="field">
-        <label>院區</label>
-        <select id="fClinic" class="select"><option value="">全部</option></select>
-      </div>
-      <div class="field">
-        <label>職類</label>
-        <select id="fJob" class="select"><option value="">全部</option></select>
-      </div>
-      <div class="field">
-        <label>請假類別</label>
-        <select id="fType" class="select"><option value="">全部</option></select>
-      </div>
-      <div class="field">
-        <label>員工姓名</label>
-        <input id="fName" class="input" type="text" placeholder="模糊搜尋">
-      </div>
+      <div class="field"><label>開始日期</label><input id="fStart" class="input" type="date"></div>
+      <div class="field"><label>結束日期</label><input id="fEnd" class="input" type="date"></div>
+      <div class="field"><label>院區</label><select id="fClinic" class="select"><option value="">全部</option></select></div>
+      <div class="field"><label>職類</label><select id="fJob" class="select"><option value="">全部</option></select></div>
+      <div class="field"><label>請假類別</label><select id="fType" class="select"><option value="">全部</option></select></div>
+      <div class="field"><label>員工姓名</label><input id="fName" class="input" type="text" placeholder="模糊搜尋"></div>
     </div>
     <div class="toolbar">
       <button class="btn" onclick="loadStats()">查詢</button>
@@ -148,40 +144,49 @@
     </div>
   </div>
 
-  <div id="content">
-    <div class="card empty">請點「查詢」開始統計</div>
-  </div>
+  <div id="content"><div class="card empty">請點「查詢」開始統計</div></div>
 </div>
 
-<!-- 更改密碼 Modal -->
-<div id="pwModal" class="modal-bg" style="display:none">
+<!-- 權限管理 Modal -->
+<div id="permsModal" class="modal-bg" style="display:none">
   <div class="modal">
-    <div class="modal-title">🔑 更改管理員密碼</div>
-    <div class="field">
-      <label>目前密碼</label>
-      <input id="pwOld" class="input" type="password" autocomplete="off">
+    <div class="modal-title">⚙️ 後台權限管理</div>
+    <div class="alert info">
+      只有「職稱」在以下清單中的員工才能登入後台。
+      職稱會即時讀取員工資料表的 F 欄。
     </div>
     <div class="field">
-      <label>新密碼（至少 4 個字元）</label>
-      <input id="pwNew" class="input" type="password" autocomplete="off">
+      <label>目前允許登入的職稱</label>
+      <div id="roleList" class="role-list"></div>
     </div>
     <div class="field">
-      <label>再次輸入新密碼</label>
-      <input id="pwNew2" class="input" type="password" autocomplete="off">
+      <label>新增職稱</label>
+      <div class="add-role-row">
+        <select id="addRoleSelect" class="select"><option value="">— 從員工資料表選擇 —</option></select>
+        <button class="btn sec" onclick="addRoleFromSelect()">加入</button>
+      </div>
+      <div class="add-role-row">
+        <input id="addRoleInput" class="input" type="text" placeholder="或手動輸入職稱名稱">
+        <button class="btn sec" onclick="addRoleFromInput()">加入</button>
+      </div>
     </div>
     <div class="modal-actions">
-      <button class="btn sec" onclick="closeChangePw()">取消</button>
-      <button class="btn" id="pwSubmitBtn" onclick="doChangePw()">確認修改</button>
+      <button class="btn sec" onclick="closePermsModal()">取消</button>
+      <button class="btn" id="permsSaveBtn" onclick="savePerms()">儲存設定</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ====== 請改成你部署完成後拿到的 Web App 網址 ====== */
+/* ====== Apps Script Web App 網址 ====== */
 var API = 'https://script.google.com/macros/s/AKfycbw_ea4nfFua_ibginB9H_94jyHtCeebNaBTV_2OoWjpo7XUyW7XrFs-9Hbtgg3U3SBF/exec';
 
+// 登入狀態
+var EMP_NO   = '';
 var PASSWORD = '';
+var USER     = { name: '', jobTitle: '', isInitial: false };
 var CURRENT_DATA = null;
+var CURRENT_ROLES = []; // 編輯中的允許職稱清單
 
 function qs(id){ return document.getElementById(id); }
 function toast(msg, type){
@@ -189,7 +194,7 @@ function toast(msg, type){
   el.textContent = msg;
   el.className = 'toast show ' + (type || '');
   clearTimeout(el._t);
-  el._t = setTimeout(function(){ el.className = 'toast'; }, 2500);
+  el._t = setTimeout(function(){ el.className = 'toast'; }, 2800);
 }
 function get(params, cb){
   var q = Object.keys(params).map(function(k){
@@ -199,67 +204,43 @@ function get(params, cb){
     toast('連線失敗：' + err, 'err');
   });
 }
+function authParams(){ return { empNo: EMP_NO, password: PASSWORD }; }
 function esc(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
-/* ---------- 登入 ---------- */
+/* ---------- 登入 / 登出 ---------- */
 function doLogin(){
-  var pw = qs('pwInput').value;
+  var no = qs('loginEmpNo').value.trim();
+  var pw = qs('loginPw').value;
+  if (!no) { toast('請輸入員編', 'err'); return; }
   if (!pw) { toast('請輸入密碼', 'err'); return; }
-  get({ action: 'verifyAdmin', password: pw }, function(res){
+  get({ action: 'verifyAdmin', empNo: no, password: pw }, function(res){
     if (res && res.success) {
-      PASSWORD = pw;
-      try { sessionStorage.setItem('leave_admin_pw', pw); } catch(e){}
+      EMP_NO = no; PASSWORD = pw;
+      USER = { name: res.name || '', jobTitle: res.jobTitle || '', isInitial: !!res.isInitial };
+      try {
+        sessionStorage.setItem('leave_admin_empNo', no);
+        sessionStorage.setItem('leave_admin_pw', pw);
+      } catch(e){}
       qs('loginView').style.display = 'none';
       qs('mainView').style.display = '';
+      qs('whoName').textContent = USER.name || EMP_NO;
+      qs('whoTitle').textContent = USER.jobTitle ? '（' + USER.jobTitle + '）' : '';
+      qs('initBanner').style.display = USER.isInitial ? '' : 'none';
       loadLists();
     } else {
-      toast((res && res.error) || '密碼錯誤', 'err');
+      toast((res && res.error) || '登入失敗', 'err');
     }
   });
 }
 function logout(){
-  PASSWORD = '';
-  try { sessionStorage.removeItem('leave_admin_pw'); } catch(e){}
+  EMP_NO = ''; PASSWORD = ''; USER = { name:'', jobTitle:'', isInitial:false };
+  try {
+    sessionStorage.removeItem('leave_admin_empNo');
+    sessionStorage.removeItem('leave_admin_pw');
+  } catch(e){}
   qs('mainView').style.display = 'none';
   qs('loginView').style.display = '';
-  qs('pwInput').value = '';
-}
-
-/* ---------- 更改密碼 ---------- */
-function openChangePw(){
-  qs('pwOld').value = '';
-  qs('pwNew').value = '';
-  qs('pwNew2').value = '';
-  qs('pwModal').style.display = 'flex';
-  setTimeout(function(){ qs('pwOld').focus(); }, 50);
-}
-function closeChangePw(){
-  qs('pwModal').style.display = 'none';
-}
-function doChangePw(){
-  var oldPw = qs('pwOld').value;
-  var newPw = qs('pwNew').value;
-  var newPw2 = qs('pwNew2').value;
-  if (!oldPw)         { toast('請輸入目前密碼', 'err'); return; }
-  if (!newPw)         { toast('請輸入新密碼', 'err'); return; }
-  if (newPw.length<4) { toast('新密碼至少需要 4 個字元', 'err'); return; }
-  if (newPw !== newPw2) { toast('兩次輸入的新密碼不一致', 'err'); return; }
-  if (oldPw === newPw)  { toast('新密碼不可與目前密碼相同', 'err'); return; }
-  qs('pwSubmitBtn').disabled = true;
-  qs('pwSubmitBtn').textContent = '送出中...';
-  get({ action: 'changePassword', oldPassword: oldPw, newPassword: newPw }, function(res){
-    qs('pwSubmitBtn').disabled = false;
-    qs('pwSubmitBtn').textContent = '確認修改';
-    if (res && res.success) {
-      // 同步更新本地記憶的密碼
-      PASSWORD = newPw;
-      try { sessionStorage.setItem('leave_admin_pw', newPw); } catch(e){}
-      closeChangePw();
-      toast('密碼已更新 ✓', 'ok');
-    } else {
-      toast('修改失敗：' + ((res && res.error) || '未知錯誤'), 'err');
-    }
-  });
+  qs('loginPw').value = '';
 }
 
 /* ---------- 載入清單 ---------- */
@@ -269,7 +250,6 @@ function loadLists(){
     fillSelect('fClinic', res.clinics || [], '全部');
     fillSelect('fJob', res.jobs || [], '全部');
     fillSelect('fType', res.leaveTypes || [], '全部');
-    // 預設本月
     quickRange('thisMonth');
     loadStats();
   });
@@ -314,31 +294,30 @@ function resetFilters(){
   qs('fName').value = '';
 }
 
-/* ---------- 讀取統計 ---------- */
+/* ---------- 統計 ---------- */
 function loadStats(){
   qs('content').innerHTML = '<div class="card empty">查詢中...</div>';
-  var params = {
-    action: 'getStats',
-    startDate: qs('fStart').value,
-    endDate: qs('fEnd').value,
-    clinic: qs('fClinic').value,
-    job: qs('fJob').value,
-    leaveType: qs('fType').value,
-    name: qs('fName').value.trim()
-  };
-  get(params, function(res){
-    if (res && res.error) { toast('查詢失敗：' + res.error, 'err'); return; }
+  var p = authParams();
+  p.action = 'getStats';
+  p.startDate = qs('fStart').value;
+  p.endDate = qs('fEnd').value;
+  p.clinic = qs('fClinic').value;
+  p.job = qs('fJob').value;
+  p.leaveType = qs('fType').value;
+  p.filterName = qs('fName').value.trim();
+  get(p, function(res){
+    if (res && res.error) {
+      qs('content').innerHTML = '<div class="card empty">'+ esc(res.error) +'</div>';
+      toast('查詢失敗：' + res.error, 'err');
+      return;
+    }
     CURRENT_DATA = res;
     render(res);
   });
 }
-
-/* ---------- 繪製 ---------- */
 function render(data){
   var records = data.records || [];
   var html = '';
-
-  // KPI
   var uniqEmp = {};
   records.forEach(function(r){ uniqEmp[r.empNo] = 1; });
   html += '<div class="kpi">';
@@ -347,21 +326,15 @@ function render(data){
   html += kpi('涉及院區數', Object.keys(data.byClinic||{}).length);
   html += kpi('涉及類別數', Object.keys(data.byType||{}).length);
   html += '</div>';
-
-  // 三個橫條統計
   html += '<div class="grid3">';
   html += barCard('各院區請假次數', data.byClinic);
   html += barCard('請假類別分佈', data.byType);
   html += barCard('職類分佈', data.byJob);
   html += '</div>';
-
-  // 員工排行 + 時段分佈
   html += '<div class="grid2">';
   html += barCard('員工請假次數排行（前10）', topN(data.byEmployee || {}, 10));
   html += barCard('時段分佈', data.byShift);
   html += '</div>';
-
-  // 明細
   html += '<div class="card">';
   html += '<div class="head"><h3 class="section">明細記錄（共 '+ records.length +' 筆）</h3></div>';
   if (records.length === 0) {
@@ -388,10 +361,8 @@ function render(data){
     html += '</tbody></table></div>';
   }
   html += '</div>';
-
   qs('content').innerHTML = html;
 }
-
 function kpi(label, value){
   return '<div class="kpi-card"><div class="kpi-label">'+ label +'</div><div class="kpi-value">'+ value +'</div></div>';
 }
@@ -427,13 +398,12 @@ function topN(obj, n){
 /* ---------- 刪除 ---------- */
 function delRec(recId){
   if (!confirm('確定刪除此筆記錄？（無法還原）')) return;
-  get({ action: 'deleteLeave', recId: recId, password: PASSWORD }, function(res){
-    if (res && res.success) {
-      toast('已刪除', 'ok');
-      loadStats();
-    } else {
-      toast('刪除失敗：' + ((res && res.error) || ''), 'err');
-    }
+  var p = authParams();
+  p.action = 'deleteLeave';
+  p.recId = recId;
+  get(p, function(res){
+    if (res && res.success) { toast('已刪除', 'ok'); loadStats(); }
+    else { toast('刪除失敗：' + ((res && res.error) || ''), 'err'); }
   });
 }
 
@@ -453,23 +423,109 @@ function exportCSV(){
       return s;
     }).join(',');
   }).join('\n');
-  // 加 BOM 避免 Excel 亂碼
-  var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   var now = new Date();
-  a.href = url;
-  a.download = '請假記錄_' + ymd(now) + '.csv';
+  a.href = url; a.download = '請假記錄_' + ymd(now) + '.csv';
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
   toast('已匯出 CSV', 'ok');
 }
 
-/* ---------- 初始化：自動登入 ---------- */
+/* ---------- 權限管理 ---------- */
+function openPermsModal(){
+  qs('addRoleInput').value = '';
+  qs('permsSaveBtn').disabled = true;
+  qs('permsSaveBtn').textContent = '載入中...';
+  qs('permsModal').style.display = 'flex';
+  // 同時拉允許清單與員工Sheet中所有職稱
+  var p = authParams(); p.action = 'getAllowedRoles';
+  get(p, function(r1){
+    if (r1 && r1.error) { toast(r1.error, 'err'); closePermsModal(); return; }
+    CURRENT_ROLES = (r1.roles || []).slice();
+    renderRoleList();
+    var p2 = authParams(); p2.action = 'getJobTitles';
+    get(p2, function(r2){
+      var titles = (r2 && r2.titles) || [];
+      var sel = qs('addRoleSelect');
+      sel.innerHTML = '<option value="">— 從員工資料表選擇 —</option>';
+      titles.forEach(function(t){
+        var o = document.createElement('option');
+        o.value = t; o.textContent = t;
+        sel.appendChild(o);
+      });
+      qs('permsSaveBtn').disabled = false;
+      qs('permsSaveBtn').textContent = '儲存設定';
+    });
+  });
+}
+function closePermsModal(){ qs('permsModal').style.display = 'none'; }
+function renderRoleList(){
+  var box = qs('roleList');
+  box.innerHTML = '';
+  CURRENT_ROLES.forEach(function(r, idx){
+    var c = document.createElement('span');
+    c.className = 'role-chip';
+    c.innerHTML = esc(r) + '<span class="x" title="移除">✕</span>';
+    c.querySelector('.x').onclick = function(){
+      CURRENT_ROLES.splice(idx, 1);
+      renderRoleList();
+    };
+    box.appendChild(c);
+  });
+}
+function addRoleFromSelect(){
+  var v = qs('addRoleSelect').value.trim();
+  if (!v) { toast('請從下拉選擇一個職稱', 'err'); return; }
+  if (CURRENT_ROLES.indexOf(v) >= 0) { toast('已在清單中', 'err'); return; }
+  CURRENT_ROLES.push(v);
+  qs('addRoleSelect').value = '';
+  renderRoleList();
+}
+function addRoleFromInput(){
+  var v = qs('addRoleInput').value.trim();
+  if (!v) { toast('請輸入職稱名稱', 'err'); return; }
+  if (CURRENT_ROLES.indexOf(v) >= 0) { toast('已在清單中', 'err'); return; }
+  CURRENT_ROLES.push(v);
+  qs('addRoleInput').value = '';
+  renderRoleList();
+}
+function savePerms(){
+  if (CURRENT_ROLES.length > 0 && USER.jobTitle && CURRENT_ROLES.indexOf(USER.jobTitle) < 0) {
+    toast('清單必須包含您目前的職稱「' + USER.jobTitle + '」，否則您下次將無法登入', 'err');
+    return;
+  }
+  qs('permsSaveBtn').disabled = true;
+  qs('permsSaveBtn').textContent = '儲存中...';
+  var p = authParams();
+  p.action = 'setAllowedRoles';
+  p.roles = JSON.stringify(CURRENT_ROLES);
+  get(p, function(res){
+    qs('permsSaveBtn').disabled = false;
+    qs('permsSaveBtn').textContent = '儲存設定';
+    if (res && res.success) {
+      toast('權限已更新 ✓', 'ok');
+      closePermsModal();
+      // 若使用者剛從初始狀態變成有設定，就把警告 banner 收起來
+      if (CURRENT_ROLES.length > 0) qs('initBanner').style.display = 'none';
+      USER.isInitial = false;
+    } else {
+      toast('儲存失敗：' + ((res && res.error) || '未知錯誤'), 'err');
+    }
+  });
+}
+
+/* ---------- 自動登入 ---------- */
 (function init(){
   try {
-    var saved = sessionStorage.getItem('leave_admin_pw');
-    if (saved) { qs('pwInput').value = saved; doLogin(); }
+    var no = sessionStorage.getItem('leave_admin_empNo');
+    var pw = sessionStorage.getItem('leave_admin_pw');
+    if (no && pw) {
+      qs('loginEmpNo').value = no;
+      qs('loginPw').value = pw;
+      doLogin();
+    }
   } catch(e){}
 })();
 </script>
