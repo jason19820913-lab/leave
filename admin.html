@@ -73,8 +73,17 @@
   .toast.ok{background:var(--ok)}
   .toast.err{background:var(--err)}
   .table-wrap{overflow-x:auto}
-  .logout{float:right;cursor:pointer;color:var(--muted);font-size:13px}
-  .logout:hover{color:var(--err)}
+  .header-tools{float:right;display:flex;gap:14px;align-items:center}
+  .header-link{cursor:pointer;color:var(--muted);font-size:13px}
+  .header-link:hover{color:var(--primary)}
+  .header-link.logout:hover{color:var(--err)}
+  /* Modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+  .modal{background:#fff;border-radius:14px;padding:22px;max-width:380px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+  .modal-title{font-size:17px;font-weight:800;margin-bottom:14px}
+  .modal .field{margin-bottom:12px}
+  .modal label{display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:5px}
+  .modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -94,7 +103,12 @@
 
 <!-- 主畫面 -->
 <div id="mainView" class="wrap" style="display:none">
-  <div class="title">員工請假統計後台 <span class="logout" onclick="logout()">登出</span></div>
+  <div class="title">員工請假統計後台
+    <span class="header-tools">
+      <span class="header-link" onclick="openChangePw()">🔑 更改密碼</span>
+      <span class="header-link logout" onclick="logout()">登出</span>
+    </span>
+  </div>
 
   <!-- 篩選 -->
   <div class="card">
@@ -136,6 +150,29 @@
 
   <div id="content">
     <div class="card empty">請點「查詢」開始統計</div>
+  </div>
+</div>
+
+<!-- 更改密碼 Modal -->
+<div id="pwModal" class="modal-bg" style="display:none">
+  <div class="modal">
+    <div class="modal-title">🔑 更改管理員密碼</div>
+    <div class="field">
+      <label>目前密碼</label>
+      <input id="pwOld" class="input" type="password" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>新密碼（至少 4 個字元）</label>
+      <input id="pwNew" class="input" type="password" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>再次輸入新密碼</label>
+      <input id="pwNew2" class="input" type="password" autocomplete="off">
+    </div>
+    <div class="modal-actions">
+      <button class="btn sec" onclick="closeChangePw()">取消</button>
+      <button class="btn" id="pwSubmitBtn" onclick="doChangePw()">確認修改</button>
+    </div>
   </div>
 </div>
 
@@ -186,6 +223,43 @@ function logout(){
   qs('mainView').style.display = 'none';
   qs('loginView').style.display = '';
   qs('pwInput').value = '';
+}
+
+/* ---------- 更改密碼 ---------- */
+function openChangePw(){
+  qs('pwOld').value = '';
+  qs('pwNew').value = '';
+  qs('pwNew2').value = '';
+  qs('pwModal').style.display = 'flex';
+  setTimeout(function(){ qs('pwOld').focus(); }, 50);
+}
+function closeChangePw(){
+  qs('pwModal').style.display = 'none';
+}
+function doChangePw(){
+  var oldPw = qs('pwOld').value;
+  var newPw = qs('pwNew').value;
+  var newPw2 = qs('pwNew2').value;
+  if (!oldPw)         { toast('請輸入目前密碼', 'err'); return; }
+  if (!newPw)         { toast('請輸入新密碼', 'err'); return; }
+  if (newPw.length<4) { toast('新密碼至少需要 4 個字元', 'err'); return; }
+  if (newPw !== newPw2) { toast('兩次輸入的新密碼不一致', 'err'); return; }
+  if (oldPw === newPw)  { toast('新密碼不可與目前密碼相同', 'err'); return; }
+  qs('pwSubmitBtn').disabled = true;
+  qs('pwSubmitBtn').textContent = '送出中...';
+  get({ action: 'changePassword', oldPassword: oldPw, newPassword: newPw }, function(res){
+    qs('pwSubmitBtn').disabled = false;
+    qs('pwSubmitBtn').textContent = '確認修改';
+    if (res && res.success) {
+      // 同步更新本地記憶的密碼
+      PASSWORD = newPw;
+      try { sessionStorage.setItem('leave_admin_pw', newPw); } catch(e){}
+      closeChangePw();
+      toast('密碼已更新 ✓', 'ok');
+    } else {
+      toast('修改失敗：' + ((res && res.error) || '未知錯誤'), 'err');
+    }
+  });
 }
 
 /* ---------- 載入清單 ---------- */
